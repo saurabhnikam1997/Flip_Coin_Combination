@@ -1,39 +1,89 @@
 #!/bin/bash -x
 
-declare -A singletDict
-singletDict=(["Heads"]=0 ["Tails"]=0)
-headCount=0
-tailCount=0
+declare -A combinations
+
+combinations=(["H"]=0 ["T"]=0 [HH]=0 [HT]=0 [TT]=0 [TH]=0 )
+
 noOfFlips=10
+coinOutput=0
+flips=0
+
 
 function headOrTail()
 {
 	if [[ $((RANDOM%2)) -eq 1 ]]
 	then
-		echo Heads
-		coinOutput="Heads"
+
+		coinOutput="H"
 	else
-		echo Tails
-		coinOutput="Tails"
+
+		coinOutput="T"
 	fi
 }
 
 function singletCombination()
 {
-	for (( i=0; i<$noOfFlips; i++ ))
+	while [[ $flips -lt $noOfflips ]]
 	do
 		headOrTail
-		if [[ $coinOutput == Heads ]]
+		if [[ $coinOutput == H ]]
 		then
-			singletDict[Heads]=$((${singletDict[Heads]}+1 ))
-			((headCount++))
+			combinations[H]=$((${combinations[H]}+1 ))
+
 		else
-			singletDict[Tails]=$((${singletDict[Tails]}+1 ))
-			((tailCount++))
+			combinations[T]=$((${combinations[T]}+1 ))
+
 		fi
+		((flips++))
 	done
-	headPercentage=`expr "scale=2; $headCount * 100 / $noOfFlips" | bc`
-	tailPercentage=`expr "scale=2; $tailCount * 100 / $noOfFlips" | bc`
+	echo headPercentage=`expr "scale=2; ${combinations[H]} * 100 / $noOfFlips" | bc`
+	echo tailPercentage=`expr "scale=2; ${combinations[T]} * 100 / $noOfFlips" | bc`
+flips=0
 }
-singletCombination
+
+function doubletCombination()
+{
+	while [[ $flips -lt $noOfFlips ]]
+	do
+		headOrTail
+		output1=$coinOutput
+		headOrTail
+		output2=$coinOutput
+		if [[ $output1$output2 == HH ]]
+		then
+			combinations[HH]=$((${combinations[HH]}+1))
+		elif [[ $output1$output2 == HT ]]
+                then
+                        combinations[HT]=$((${combinations[HT]}+1))
+		elif [[ $output1$output2 == TT ]]
+                then
+                        combinations[TT]=$((${combinations[TT]}+1))
+		elif [[ $output1$output2 == TH ]]
+                then
+                        combinations[TH]=$((${combinations[TH]}+1))
+		fi
+		((flips++))
+	done
+	HHpercentage=`expr "scale=2; ${combinations[HH]} * 100 / $flips" | bc`
+	HTpercentage=`expr "scale=2; ${combinations[HT]} * 100 / $flips" | bc`
+	TTpercentage=`expr "scale=2; ${combinations[TT]} * 100 / $flips" | bc`
+	THpercentage=`expr "scale=2; ${combinations[TH]} * 100 / $flips" | bc`
+
+flips=0
+}
+
+	singletCombination
+	echo H T
+	echo ${combinations["H"]} ${combinations["T"]}
+
+	doubletCombination
+	echo HH HT TH TT
+	echo ${combinations["HH"]} ${combinations["HT"]} ${combinations["TH"]} ${combinations["TT"]}
+
+
+
+
+
+
+
 
